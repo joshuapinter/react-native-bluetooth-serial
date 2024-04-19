@@ -88,7 +88,7 @@ android {
 
     defaultConfig {
         applicationId "com.bluetoothserialexample"
-        minSdkVersion 16
+        minSdkVersion 22 // Android OS 5.1
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
