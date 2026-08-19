@@ -145,8 +145,10 @@ class RCTBluetoothSerialService {
         mConnectedThread = new ConnectedThread(socket);
         mConnectedThread.start();
 
-        mModule.onConnectionSuccess("Connected to " + device.getName());
+        // Update the state before notifying JS so listeners that re-query isConnected() get an answer
+        // consistent with the event they are reacting to.
         setState(STATE_CONNECTED);
+        mModule.onConnectionSuccess("Connected to " + device.getName());
     }
 
 
@@ -154,16 +156,21 @@ class RCTBluetoothSerialService {
      * Indicate that the connection attempt failed and notify the UI Activity.
      */
     private void connectionFailed() {
-        mModule.onConnectionFailed("Unable to connect to device"); // Send a failure message
+        // Stop (and reset the state) before notifying JS so listeners that re-query isConnected() get an
+        // answer consistent with the event they are reacting to.
         RCTBluetoothSerialService.this.stop(); // Start the service over to restart listening mode
+        mModule.onConnectionFailed("Unable to connect to device"); // Send a failure message
     }
 
     /**
      * Indicate that the connection was lost and notify the UI Activity.
      */
     private void connectionLost() {
-        mModule.onConnectionLost("Device connection was lost");  // Send a failure message
+        // Stop (and reset the state) before notifying JS so listeners that re-query isConnected() get an
+        // answer consistent with the event they are reacting to. Notifying first leaves a window where JS
+        // reacts to connectionLost, sees isConnected() == true, and wrongly concludes it is still connected.
         RCTBluetoothSerialService.this.stop(); // Start the service over to restart listening mode
+        mModule.onConnectionLost("Device connection was lost");  // Send a failure message
     }
 
     /**
@@ -309,8 +316,7 @@ class RCTBluetoothSerialService {
                 } catch (Exception e) {
                     Log.e(TAG, "disconnected", e);
                     mModule.onError(e);
-                    connectionLost();
-                    RCTBluetoothSerialService.this.stop(); // Start the service over to restart listening mode
+                    connectionLost(); // NOTE: connectionLost() already stops the service, no additional stop() is needed.
                     break;
                 }
             }
