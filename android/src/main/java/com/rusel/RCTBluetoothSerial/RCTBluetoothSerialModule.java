@@ -141,10 +141,10 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule impleme
     }
 
     @Override
-    public void onCatalystInstanceDestroy() {
+    public void invalidate() {
         if (D) Log.d(TAG, "Catalyst instance destroyed");
-        super.onCatalystInstanceDestroy();
         mBluetoothService.stop();
+        super.invalidate();
     }
 
     /*******************************/
