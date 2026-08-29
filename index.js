@@ -1,7 +1,10 @@
 const ReactNative = require('react-native')
 const { Buffer } = require('buffer')
 const { NativeModules, DeviceEventEmitter } = ReactNative
-const BluetoothSerial = NativeModules.BluetoothSerial
+// The New Architecture's TurboModule interop looks module names up verbatim - the old
+// architecture's NativeModules registry stripped the "RCT" prefix, which is how this module
+// (getName() = "RCTBluetoothSerial") was ever visible as "BluetoothSerial". Try both.
+const BluetoothSerial = NativeModules.RCTBluetoothSerial || NativeModules.BluetoothSerial
 
 /**
  * Listen for available events
